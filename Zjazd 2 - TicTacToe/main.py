@@ -1,6 +1,10 @@
 # https://pl.wikipedia.org/wiki/K%C3%B3%C5%82ko_i_krzy%C5%BCyk
 # Paweł Szyszkowski s18184, Braian Kreft s16723
 # Środowisko nie wymaga przygotowania
+# Źródła
+# https://pl.wikipedia.org/wiki/Algorytm_min-max
+# https://www.neverstopbuilding.com/blog/minimax
+#
 
 
 from player import HumanPlayer, AiPlayer
