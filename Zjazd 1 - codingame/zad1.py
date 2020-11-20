@@ -12,20 +12,17 @@ import math
 
 # game loop
 while True:
-    mountains = [];
+    mountains = []
     for i in range(8):
         mountain_h = int(input())  # represents the height of one mountain.
 
-    # Write an action using print
-    # To debug: print("Debug messages...", file=sys.stderr, flush=True)
+        # Write an action using print
+        # To debug: print("Debug messages...", file=sys.stderr, flush=True)
 
-    # The index of the mountain to fire on.
-        mountains.append(mountain_h);
+        # The index of the mountain to fire on.
+        mountains.append(mountain_h)
     print(mountains.index(max(mountains)))
-	
-	
-	
-	
+
 # https://www.codingame.com/ide/puzzle/power-of-thor-episode-1 Paweł Szyszkowski s18184
 
 import sys
@@ -50,7 +47,6 @@ while True:
     # Write an action using print
     # To debug: print("Debug messages...", file=sys.stderr, flush=True)
 
-
     # A single line providing the move to be made: N NE E SE S SW W or NW
     if light_y > initial_ty:
         initial_ty += 1
@@ -58,15 +54,14 @@ while True:
     elif light_y < initial_ty:
         direction += "N"
         initial_ty -= 1
-    if light_x > initial_tx:        
+    if light_x > initial_tx:
         direction += "E"
         initial_tx += 1
     elif light_x < initial_tx:
         direction += "W"
-        initial_tx -= 1    
+        initial_tx -= 1
     print(direction)
-	
-	
+
 # https://www.codingame.com/ide/puzzle/horse-racing-duals Paweł Szyszkowski s18184	
 
 import sys
@@ -82,12 +77,12 @@ for i in range(n):
     pi = int(input())
     array.append(pi)
 array.sort()
-for i in range(len(array)-1):
+for i in range(len(array) - 1):
     # print(array[i], file=sys.stderr, flush=True)
     if minValue == None:
-        minValue = abs(array[i] - array[i+1])
-    elif abs(array[i] - array[i+1]) < minValue:
-        minValue = abs(array[i] - array[i+1])
+        minValue = abs(array[i] - array[i + 1])
+    elif abs(array[i] - array[i + 1]) < minValue:
+        minValue = abs(array[i] - array[i + 1])
 # Write an answer using print
 # To debug: print("Debug messages...", file=sys.stderr, flush=True)
 print(minValue)
