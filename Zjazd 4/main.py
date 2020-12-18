@@ -1,20 +1,33 @@
-import argparse
+"""
+Rekomendator filmów
+Program rekomnedujący filmy na podstawie danych zebranych w bazie
+
+Autorzy
+-Paweł Szyszkowski s18184
+-Braian Kreft s16723
+
+## Instalacja
+
+pip install -r requirements.txt
+
+## Uruchomienie
+python main.py
+
+## Instrukcja użycia
+Po uruchomieniu programu należy:
+-wybrać użytkownika, któremu chcemy znaleźć rekomendacje
+-wybrać algorytm, którego chcemy użyć
+-po zaprezentowaniu wyników możemy wybrać opcję pobrania opisu do filmu
+
+Działanie programu zaprezentowane jest w załączonym nagraniu.
+
+"""
 import json
+
 import numpy as np
 from imdb import IMDb
 
 ia = IMDb()
-
-
-def build_arg_parser():
-    parser = argparse.ArgumentParser(description='Compute similarity score')
-    parser.add_argument('--user1', dest='user1', required=True,
-                        help='First user')
-    parser.add_argument('--user2', dest='user2', required=True,
-                        help='Second user')
-    parser.add_argument("--score-type", dest="score_type", required=True,
-                        choices=['Euclidean', 'Pearson'], help='Similarity metric to be used')
-    return parser
 
 
 # Compute the Euclidean distance score between user1 and user2
@@ -25,15 +38,12 @@ def euclidean_score(dataset, user1, user2):
     if user2 not in dataset:
         raise TypeError('Cannot find ' + user2 + ' in the dataset')
 
-    # Movies rated by both user1 and user2
     common_movies = {}
 
     for item in dataset[user1]:
         if item in dataset[user2]:
             common_movies[item] = 1
 
-    # If there are no common movies between the users, 
-    # then the score is 0 
     if len(common_movies) == 0:
         return 0
 
@@ -54,7 +64,6 @@ def pearson_score(dataset, user1, user2):
     if user2 not in dataset:
         raise TypeError('Cannot find ' + user2 + ' in the dataset')
 
-    # Movies rated by both user1 and user2
     common_movies = {}
 
     for item in dataset[user1]:
@@ -63,22 +72,17 @@ def pearson_score(dataset, user1, user2):
 
     num_ratings = len(common_movies)
 
-    # If there are no common movies between user1 and user2, then the score is 0 
     if num_ratings == 0:
         return 0
 
-    # Calculate the sum of ratings of all the common movies 
     user1_sum = np.sum([dataset[user1][item] for item in common_movies])
     user2_sum = np.sum([dataset[user2][item] for item in common_movies])
 
-    # Calculate the sum of squares of ratings of all the common movies 
     user1_squared_sum = np.sum([np.square(dataset[user1][item]) for item in common_movies])
     user2_squared_sum = np.sum([np.square(dataset[user2][item]) for item in common_movies])
 
-    # Calculate the sum of products of the ratings of the common movies
     sum_of_products = np.sum([dataset[user1][item] * dataset[user2][item] for item in common_movies])
 
-    # Calculate the Pearson correlation score
     Sxy = sum_of_products - (user1_sum * user2_sum / num_ratings)
     Sxx = user1_squared_sum - np.square(user1_sum) / num_ratings
     Syy = user2_squared_sum - np.square(user2_sum) / num_ratings
@@ -93,50 +97,75 @@ def movie_description_get(title):
     items = ia.search_movie(title)
     i = 0
     while i < len(items):
-        print('\t[' + str(i) + '] ' + items[i]['title'] + ' (' + str(items[i]['year']) + ')')
+        print('\t[' + str(i) + '] ' + items[i]['title'] + (
+            ' (' + str(items[i]['year']) + ')' if 'year' in items[i] else ''))
         i += 1
 
-    movieIndex = int(input('\nKtóry film masz na myśli? '))
-    movie = ia.get_movie(items[movieIndex].movieID)
+    movie_index = int(input('\nKtóry film masz na myśli? '))
+    movie_details = ia.get_movie(items[movie_index].movieID)
 
-    print(movie['plot'][0])
-    # print(ia.get_movie_main(items[0].movieID))
-    # print(items)
+    print(('\nOpis: ' + movie_details['plot'][0]) if 'plot' in movie_details else '\nBrak opisu')
 
-def print_result(maxScore, userDict):
-    print('Na podstawie danych uzytkownika ' + maxScore['user'])
-    new_dict = {}
-    for key, value in userDict.items():
+
+def print_result(user_name, user_dict):
+    print('Na podstawie danych uzytkownika ' + user_name)
+    movie_without_duplicates = {}
+    for key, value in user_dict.items():
         if key not in data[user].keys():
-            new_dict[key] = value
-    sorted_dict = dict(sorted(new_dict.items(), key=lambda element: element[1]))
-    best7 = dict(list(sorted_dict.items())[-7:])
-    worse7 = dict(list(sorted_dict.items())[:7])
+            movie_without_duplicates[key] = value
+    sorted_dict = dict(sorted(movie_without_duplicates.items(), key=lambda element: element[1], reverse=True))
+    best7 = dict(list(sorted_dict.items())[:7])
+    worse7 = dict(list(sorted_dict.items())[-7:])
     counter = 0
-    movie_all_list = []
+    movie_all = []
+
     print('\nPolecam filmy:')
     for itm in best7:
         print('\t[' + str(counter) + '] ' + itm + ' ' + str(best7[itm]))
         counter += 1
-        movie_all_list.append(itm)
+        movie_all.append(itm)
 
     print('\nNie polecam filmów:')
     for itm in worse7:
         print('\t[' + str(counter) + '] ' + itm + ' ' + str(worse7[itm]))
         counter += 1
-        movie_all_list.append(itm)
-    return movie_all_list
+        movie_all.append(itm)
+    return movie_all
+
+
+def select_userr():
+    counter = 0
+    user_list = []
+    print('\nWybierz użytkownika')
+    for item in data:
+        print('\t[' + str(counter) + '] ' + item)
+        user_list.append(item)
+        counter += 1
+    return user_list[int(input())]
+
+
+def select_score_type():
+    counter = 0
+    score_type_dict = ['Pearson', 'Euclidean']
+    score_type_list = []
+    print('Wybierz algorytm')
+    for item in score_type_dict:
+        print('\t[' + str(counter) + '] ' + item)
+        score_type_list.append(item)
+        counter += 1
+    return score_type_list[int(input())]
+
+
 if __name__ == '__main__':
-    # user = input()
-    # score_type = input()
-    user = 'Pawel Czapiewski'
-    # score_type = 'Euclidean'
-    score_type = 'Pearson'
     ratings_file = 'ratings.json'
-    movie_description_show = True
-    with open(ratings_file, 'r') as f:
+    with open(ratings_file, 'r', encoding='utf-8') as f:
         data = json.loads(f.read())
+
+    user = select_userr()
+    score_type = select_score_type()
+    show_description = True
     score_array = []
+
     for item in data:
         if item != user:
             if score_type == 'Euclidean':
@@ -144,11 +173,14 @@ if __name__ == '__main__':
             else:
                 score_array.append({'score': pearson_score(data, user, item), 'user': item})
 
-    maxScore = max(score_array, key=lambda x: x['score'])
-    userDict = data[maxScore['user']]
-    movie_all_list = print_result(maxScore, userDict)
+    max_score = max(score_array, key=lambda x: x['score'])
 
-    while movie_description_show:
-        movie = int(input('\nw celu pobrania opisu filmu podaj numer zaprezentowany obok tytułu: '))
+    user_movies = data[max_score['user']]
+    movie_all_list = print_result(max_score['user'], user_movies)
+    show_description = True if input('\n[tak/nie] Czy wyświetlić szczegóły jednego z filmów? ') == 'tak' else False
+    while show_description:
+        movie = int(input('\nW celu pobrania opisu filmu podaj numer zaprezentowany obok tytułu: '))
         movie_description_get(movie_all_list[movie])
-        print_result(maxScore, userDict)
+        show_description = True if input('\n[tak/nie] Czy wyświetlić szczegóły innego filmu? ') == 'tak' else False
+        if show_description:
+            print_result(max_score['user'], user_movies)
