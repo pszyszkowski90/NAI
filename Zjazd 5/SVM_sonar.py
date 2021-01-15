@@ -1,13 +1,10 @@
 import numpy as np
 from sklearn import svm
-from numpy import random
+
 
 input_file = 'data_sonar.txt'
 data = np.loadtxt(input_file, delimiter=',')
 X, y = data[:, :60], data[:, -1]
-# print(X)
-# print(y)
-
 
 svc = svm.SVC(kernel='linear', C=1, gamma=100).fit(X, y)
 
