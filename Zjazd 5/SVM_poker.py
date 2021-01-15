@@ -9,7 +9,7 @@ X, y = data[:, :10], data[:, -1]
 svc = svm.SVC(kernel='linear', C=1, gamma=100).fit(X, y)
 
 XX = []
-for i in range(9):
+for i in range(10):
     if i % 2 == 0:
         min, max = 1, 5
     else:
@@ -18,3 +18,4 @@ for i in range(9):
 
 XX = np.asarray(XX, dtype=np.float32)
 Z = svc.predict(np.c_[XX.transpose()])
+print(Z)
